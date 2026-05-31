@@ -1,0 +1,1243 @@
+/* ══════════════════════════════════════════════════════
+   VOTE.CSS — Danzad Malditos  v8 (estable)
+   ──────────────────────────────────────────────────────
+   Estética: cálida · artística · escénica · legible
+   WIX: touch-action:pan-y, overflow:visible en todo
+        contenedor principal — el scroll pertenece a Wix
+   GitHub Pages: sin dependencias externas de CSS
+   ══════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────
+   TOKENS DE DISEÑO
+───────────────────────────────────────── */
+:root {
+  /* Fondos */
+  --c-bg:        #0f0d0b;
+  --c-bg-warm:   #16120e;
+  --c-surface:   #1e1916;
+  --c-surface2:  #251f1a;
+
+  /* Bordes */
+  --c-border:    rgba(220,190,150,0.12);
+  --c-border2:   rgba(220,190,150,0.22);
+
+  /* Texto */
+  --c-text:      #f0e8dc;
+  --c-muted:     rgba(240,232,220,0.45);
+  --c-accent:    #c8a96e;
+  --c-accent2:   #e8c98a;
+  --c-white:     #ffffff;
+
+  /* Parejas */
+  --pair-1: #e03030;
+  --pair-2: #d4aa20;
+  --pair-3: #2ea86b;
+  --pair-4: #2b7fd4;
+  --pair-5: #9b52d4;
+
+  /* Tipografías */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'Cormorant Garamond', serif;
+  --font-ui:      'Archivo Narrow', sans-serif;
+
+  /* Espaciado */
+  --gap-sm: 0.75rem;
+  --gap-md: 1.5rem;
+  --gap-lg: 3rem;
+
+  /* Animaciones */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-med:  380ms;
+  --dur-slow: 650ms;
+}
+
+/* ─────────────────────────────────────────
+   RESET GLOBAL
+   touch-action: pan-y → scroll táctil
+   pertenece a Wix, NO al iframe.
+───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+.screen {
+  touch-action: pan-y;
+}
+
+html {
+  /* CRÍTICO: sin overflow horizontal ni vertical */
+  overflow: visible;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  /* CRÍTICO para Wix: sin overflow-y, sin height fija */
+  overflow: visible;
+  min-height: 100vh;
+  height: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────
+   SISTEMA DE PANTALLAS
+   .active  → display: block  (JS lo añade)
+   .visible → opacity: 1      (JS lo añade en
+   el siguiente requestAnimationFrame para
+   activar la transición CSS correctamente)
+───────────────────────────────────────── */
+.screen {
+  display: none;
+  opacity: 0;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  /* CRÍTICO: sin overflow → Wix maneja el scroll */
+  overflow: visible;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+.screen.active  { display: block; }
+.screen.visible { opacity: 1; }
+
+/* ─────────────────────────────────────────
+   EFECTOS AMBIENTALES COMPARTIDOS
+───────────────────────────────────────── */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.78) 100%);
+}
+
+.vignette-dark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.90) 100%);
+}
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA 1 — MENÚ INICIAL
+   Fondo: imagen de danza + gradiente oscuro artístico.
+   --menu-bg-url: inyectable desde JS (/voteSettings)
+══════════════════════════════════════════════════════ */
+#screen-menu {
+  --menu-bg-url: url("https://images.unsplash.com/photo-1547153760-18fc86324498?w=1400&q=85&auto=format&fit=crop&crop=center");
+  background-color: #0a0806;
+  background-image:
+    linear-gradient(180deg,
+      rgba(0,0,0,0.50) 0%,
+      rgba(0,0,0,0.22) 35%,
+      rgba(0,0,0,0.60) 72%,
+      rgba(0,0,0,0.95) 100%),
+    var(--menu-bg-url);
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+}
+
+.menu-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.menu-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--gap-lg) var(--gap-md);
+  text-align: center;
+  gap: var(--gap-md);
+}
+
+/* Título DANZAD MALDITOS */
+.menu-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.88;
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.2s forwards;
+}
+
+.menu-title-line1 {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 18vw, 11rem);
+  letter-spacing: 0.18em;
+  color: var(--c-white);
+  display: block;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.9);
+}
+
+.menu-title-line2 {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 18vw, 11rem);
+  letter-spacing: 0.18em;
+  color: var(--c-accent2);
+  display: block;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.9);
+}
+
+/* Botón VOTACIÓN */
+.btn-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 3rem;
+  background: transparent;
+  border: 1px solid var(--c-accent);
+  color: var(--c-accent);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  transition: color var(--dur-med) var(--ease-out);
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.5s forwards;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-med) var(--ease-out);
+  z-index: 0;
+}
+
+.btn-main:hover::before,
+.btn-main:focus-visible::before { transform: scaleX(1); }
+
+.btn-main:hover,
+.btn-main:focus-visible { color: #0a0806; outline: none; }
+
+.btn-main:hover .btn-arrow { transform: translateX(6px); }
+
+.btn-text,
+.btn-arrow { position: relative; z-index: 1; }
+
+.btn-arrow {
+  transition: transform var(--dur-med) var(--ease-out);
+  font-size: 1.2em;
+}
+
+.menu-footer-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(240,232,220,0.55);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.75s forwards;
+}
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA 2 — SALA DE ESPERA
+══════════════════════════════════════════════════════ */
+#screen-waiting {
+  background: #080a0d;
+}
+
+.waiting-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 30%, rgba(25,35,55,0.7) 0%, transparent 70%),
+    #080a0d;
+}
+
+.waiting-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--gap-lg) var(--gap-md);
+  text-align: center;
+  gap: var(--gap-md);
+}
+
+/* Símbolo animado */
+.waiting-symbol {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 0.5rem;
+}
+
+.symbol-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(200,176,138,0.22);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-1 {
+  width: 160px;
+  height: 160px;
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+
+.ring-2 {
+  width: 120px;
+  height: 120px;
+  border-color: rgba(200,176,138,0.15);
+  animation: pulse-ring 3s ease-in-out 0.5s infinite;
+}
+
+.ring-3 {
+  width: 80px;
+  height: 80px;
+  border-color: rgba(200,176,138,0.10);
+  animation: pulse-ring 3s ease-in-out 1s infinite;
+}
+
+.symbol-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  color: var(--c-accent);
+}
+
+.symbol-core svg,
+.symbol-core img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Animación de trote — aplica al SVG default y a imágenes externas */
+.horse-svg,
+.symbol-core img {
+  animation: horse-trot 0.9s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+.waiting-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: 0.12em;
+  color: var(--c-white);
+  line-height: 1.0;
+}
+
+.waiting-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.waiting-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  animation: blink-dot 1.4s ease-in-out infinite;
+}
+.waiting-dots span:nth-child(2) { animation-delay: 0.2s; }
+.waiting-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.waiting-message {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  color: var(--c-muted);
+  max-width: 32ch;
+}
+
+.waiting-signature {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--c-muted);
+  margin-top: -0.75rem;
+}
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA 3 — VOTACIÓN
+   FIX v8: vote-bg usa position:absolute (era fixed —
+   causaba problemas en Wix iframe)
+══════════════════════════════════════════════════════ */
+#screen-vote {
+  background: var(--c-bg-warm);
+  padding-bottom: 5rem;
+}
+
+/* Línea decorativa superior dorada */
+#screen-vote::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: 10;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--c-accent),
+    var(--c-accent2),
+    var(--c-accent),
+    transparent
+  );
+  opacity: 0.5;
+}
+
+/* FIX: position:absolute en vez de fixed — Wix compatibility */
+.vote-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.vote-bg-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(180,120,50,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(40,60,120,0.07) 0%, transparent 60%),
+    linear-gradient(160deg, #1a1410 0%, #0f0d0b 45%, #111318 100%);
+}
+
+/* Botón ↺ Reiniciar selección */
+.btn-reset {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--c-border2);
+  color: var(--c-muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.9rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn-reset:hover,
+.btn-reset:focus-visible {
+  color: var(--c-text);
+  border-color: var(--c-accent);
+  background: rgba(200,169,110,0.08);
+  outline: none;
+}
+
+/* Cabecera votación */
+.vote-header {
+  position: relative;
+  z-index: 10;
+  padding: 3.5rem var(--gap-md) 1.25rem;
+  text-align: center;
+}
+
+.vote-logo-small {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.22em;
+  color: var(--c-accent);
+  margin-bottom: 0.6rem;
+}
+
+.vote-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  letter-spacing: 0.12em;
+  color: var(--c-white);
+  margin-bottom: 0.4rem;
+}
+
+.vote-subtitle {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--c-muted);
+  font-size: 1rem;
+}
+
+/* ─────────────────────────────────────────
+   BANNER — PAREJA ACTIVA
+   Indica qué pareja se está construyendo.
+───────────────────────────────────────── */
+.active-pair-banner {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.5rem auto 0.75rem;
+  padding: 0.55rem 1.5rem;
+  max-width: 300px;
+  border-radius: 2rem;
+  background: rgba(200,169,110,0.08);
+  border: 1px solid rgba(200,169,110,0.20);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--c-text);
+  transition:
+    background var(--dur-med) var(--ease-out),
+    border-color var(--dur-med) var(--ease-out);
+}
+
+.apb-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  flex-shrink: 0;
+  transition: background var(--dur-med);
+}
+
+/* ─────────────────────────────────────────
+   INDICADOR DE PAREJAS — PILLS
+───────────────────────────────────────── */
+.pairs-indicator {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem var(--gap-md) 1rem;
+}
+
+.pair-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--c-border);
+  border-radius: 2rem;
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--c-muted);
+  background: rgba(255,255,255,0.02);
+  transition: all var(--dur-med) var(--ease-out);
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  transition: all var(--dur-med) var(--ease-out);
+}
+
+.pill-count { font-size: 0.6rem; opacity: 0.8; }
+
+/* Pills — estado activo (construyendo esta pareja) */
+.pair-pill[data-pair="1"].active { border-color: var(--pair-1); color: var(--pair-1); background: rgba(224,48,48,0.10); }
+.pair-pill[data-pair="2"].active { border-color: var(--pair-2); color: var(--pair-2); background: rgba(212,170,32,0.10); }
+.pair-pill[data-pair="3"].active { border-color: var(--pair-3); color: var(--pair-3); background: rgba(46,168,107,0.10); }
+.pair-pill[data-pair="4"].active { border-color: var(--pair-4); color: var(--pair-4); background: rgba(43,127,212,0.10); }
+.pair-pill[data-pair="5"].active { border-color: var(--pair-5); color: var(--pair-5); background: rgba(155,82,212,0.10); }
+
+/* Pills — estado completo (pareja formada) */
+.pair-pill[data-pair="1"].complete { border-color: var(--pair-1); background: var(--pair-1); color: #fff; }
+.pair-pill[data-pair="2"].complete { border-color: var(--pair-2); background: var(--pair-2); color: #111; }
+.pair-pill[data-pair="3"].complete { border-color: var(--pair-3); background: var(--pair-3); color: #fff; }
+.pair-pill[data-pair="4"].complete { border-color: var(--pair-4); background: var(--pair-4); color: #fff; }
+.pair-pill[data-pair="5"].complete { border-color: var(--pair-5); background: var(--pair-5); color: #fff; }
+
+.pair-pill.complete .pill-dot { opacity: 1; background: white; }
+.pair-pill[data-pair="2"].complete .pill-dot { background: #111; }
+
+/* ─────────────────────────────────────────
+   GRID DE PARTICIPANTES
+───────────────────────────────────────── */
+.participants-grid {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 1rem;
+  padding: 0 var(--gap-md) var(--gap-md);
+  max-width: 920px;
+  margin: 0 auto;
+  /* Sin overflow → crecimiento natural, Wix maneja scroll */
+}
+
+/* Estado de carga inicial */
+.loading-participants {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--c-muted);
+  font-family: var(--font-body);
+  font-style: italic;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--c-border);
+  border-top-color: var(--c-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ══════════════════════════════════════════════════════
+   TARJETAS DE PARTICIPANTES
+   ──────────────────────────────────────────────────────
+   Estados:
+   — Normal:            borde dorado tenue, imagen en grises
+   — :hover             borde más visible, imagen a color
+   — .selected          borde blanco brillante + pulso animado
+                        (esperando 2do participante)
+   — .paired.pair-N     color sólido de la pareja
+══════════════════════════════════════════════════════ */
+.participant-card {
+  position: relative;
+  border: 2px solid var(--c-border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--c-surface);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition:
+    border-color var(--dur-med) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-med) var(--ease-out),
+    background var(--dur-med) var(--ease-out);
+}
+
+.participant-card:hover:not(.locked) {
+  transform: translateY(-3px);
+  border-color: rgba(220,190,150,0.35);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+}
+
+.participant-card:active:not(.locked) {
+  transform: scale(0.96);
+}
+
+/* Contenedor de imagen — aspect ratio 3:4 */
+.card-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: #1e1916;
+}
+
+.card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    filter var(--dur-med) var(--ease-out);
+  filter: grayscale(20%) brightness(0.85);
+}
+
+.participant-card:hover:not(.locked) .card-image-wrap img {
+  filter: grayscale(0%) brightness(1.0);
+  transform: scale(1.05);
+}
+
+/* Placeholder SVG — sin dependencias externas */
+.card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #221c16 0%, #14110e 100%);
+}
+
+/* Overlay de color (activo en estado paired) */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+/* Número del participante — esquina superior izquierda */
+.card-num {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  z-index: 4;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.75);
+  background: rgba(0,0,0,0.55);
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Badge número de pareja — esquina superior derecha */
+.card-pair-badge {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: white;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0.4);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  line-height: 1;
+  transition:
+    opacity var(--dur-med) var(--ease-out),
+    transform var(--dur-med) var(--ease-out),
+    background var(--dur-med);
+}
+
+.participant-card.selected .card-pair-badge,
+.participant-card.paired   .card-pair-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Info — nombre */
+.card-info {
+  padding: 0.6rem 0.7rem;
+  position: relative;
+  z-index: 2;
+  background: inherit;
+  transition: background var(--dur-med);
+}
+
+.card-name {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--c-text);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.04em;
+  transition: color var(--dur-med);
+}
+
+/* ─────────────────────────────────────────
+   ESTADO: SELECCIONADO (pending)
+   Primer toque — borde blanco brillante
+   con pulso animado. Espera 2do participante.
+───────────────────────────────────────── */
+.participant-card.selected {
+  border-color: rgba(255,255,255,0.92);
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.24),
+    0 0 22px rgba(255,255,255,0.16),
+    0 6px 20px rgba(0,0,0,0.5);
+  animation: card-pulse 1.6s ease-in-out infinite;
+}
+
+.participant-card.selected .card-overlay {
+  opacity: 0.18;
+  background: white;
+}
+
+.participant-card.selected .card-info {
+  background: rgba(255,255,255,0.10);
+}
+
+.participant-card.selected .card-name {
+  color: white;
+}
+
+@keyframes card-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(255,255,255,0.22),
+      0 0 18px rgba(255,255,255,0.10),
+      0 6px 20px rgba(0,0,0,0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px rgba(255,255,255,0.12),
+      0 0 30px rgba(255,255,255,0.20),
+      0 6px 20px rgba(0,0,0,0.5);
+  }
+}
+
+/* ─────────────────────────────────────────
+   ESTADO: EMPAREJADO — color sólido de pareja
+───────────────────────────────────────── */
+.participant-card.paired {
+  border-width: 2px;
+}
+
+/* Pareja 1 — Rojo */
+.participant-card.pair-1 {
+  border-color: var(--pair-1);
+  box-shadow: 0 0 0 2px rgba(224,48,48,0.25), 0 6px 22px rgba(224,48,48,0.18);
+}
+.participant-card.pair-1 .card-overlay    { opacity: 0.22; background: var(--pair-1); }
+.participant-card.pair-1 .card-pair-badge { background: var(--pair-1); }
+.participant-card.pair-1 .card-info       { background: rgba(224,48,48,0.12); }
+.participant-card.pair-1 .card-name       { color: #ffb3b3; }
+
+/* Pareja 2 — Amarillo */
+.participant-card.pair-2 {
+  border-color: var(--pair-2);
+  box-shadow: 0 0 0 2px rgba(212,170,32,0.25), 0 6px 22px rgba(212,170,32,0.18);
+}
+.participant-card.pair-2 .card-overlay    { opacity: 0.22; background: var(--pair-2); }
+.participant-card.pair-2 .card-pair-badge { background: var(--pair-2); color: #111; }
+.participant-card.pair-2 .card-info       { background: rgba(212,170,32,0.12); }
+.participant-card.pair-2 .card-name       { color: #ffe080; }
+
+/* Pareja 3 — Verde */
+.participant-card.pair-3 {
+  border-color: var(--pair-3);
+  box-shadow: 0 0 0 2px rgba(46,168,107,0.25), 0 6px 22px rgba(46,168,107,0.18);
+}
+.participant-card.pair-3 .card-overlay    { opacity: 0.22; background: var(--pair-3); }
+.participant-card.pair-3 .card-pair-badge { background: var(--pair-3); }
+.participant-card.pair-3 .card-info       { background: rgba(46,168,107,0.12); }
+.participant-card.pair-3 .card-name       { color: #90ebb0; }
+
+/* Pareja 4 — Azul */
+.participant-card.pair-4 {
+  border-color: var(--pair-4);
+  box-shadow: 0 0 0 2px rgba(43,127,212,0.25), 0 6px 22px rgba(43,127,212,0.18);
+}
+.participant-card.pair-4 .card-overlay    { opacity: 0.22; background: var(--pair-4); }
+.participant-card.pair-4 .card-pair-badge { background: var(--pair-4); }
+.participant-card.pair-4 .card-info       { background: rgba(43,127,212,0.12); }
+.participant-card.pair-4 .card-name       { color: #a0c8ff; }
+
+/* Pareja 5 — Morado */
+.participant-card.pair-5 {
+  border-color: var(--pair-5);
+  box-shadow: 0 0 0 2px rgba(155,82,212,0.25), 0 6px 22px rgba(155,82,212,0.18);
+}
+.participant-card.pair-5 .card-overlay    { opacity: 0.22; background: var(--pair-5); }
+.participant-card.pair-5 .card-pair-badge { background: var(--pair-5); }
+.participant-card.pair-5 .card-info       { background: rgba(155,82,212,0.12); }
+.participant-card.pair-5 .card-name       { color: #d0a8ff; }
+
+/* Tarjeta bloqueada */
+.participant-card.locked {
+  cursor: default;
+  opacity: 0.35;
+}
+
+/* ─────────────────────────────────────────
+   BOTÓN REGISTRAR VOTO
+───────────────────────────────────────── */
+.vote-submit-area {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--gap-md) var(--gap-md) var(--gap-lg);
+}
+
+.btn-register {
+  padding: 1rem 3.5rem;
+  background: var(--c-accent);
+  color: #0f0d0b;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  transition:
+    background var(--dur-med),
+    transform var(--dur-fast),
+    opacity var(--dur-med),
+    box-shadow var(--dur-med);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn-register:disabled {
+  opacity: 0.20;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-register:not(:disabled):hover {
+  background: var(--c-accent2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(200,169,110,0.30);
+}
+
+.btn-register:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.vote-progress-text {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--c-muted);
+  text-align: center;
+}
+
+/* ─────────────────────────────────────────
+   MODAL DE CONFIRMACIÓN
+───────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: #1e1916;
+  border: 1px solid rgba(220,190,150,0.15);
+  border-top: 2px solid var(--c-accent);
+  padding: 2.5rem 2rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  transform: translateY(24px) scale(0.97);
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.modal-overlay.open .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.modal-icon {
+  font-size: 1.5rem;
+  color: var(--c-accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  letter-spacing: 0.08em;
+  color: var(--c-white);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.modal-pairs-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+}
+
+.summary-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+  color: white;
+  font-weight: bold;
+}
+
+/* Nombres reales de participantes en el modal */
+.summary-names {
+  color: var(--c-text);
+  flex: 1;
+  letter-spacing: 0.03em;
+  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.summary-vs {
+  color: var(--c-muted);
+  font-style: italic;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  margin: 0 0.2rem;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.modal-btn {
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all var(--dur-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.modal-no {
+  background: transparent;
+  border-color: var(--c-border2);
+  color: var(--c-muted);
+}
+
+.modal-no:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: var(--c-text);
+}
+
+.modal-yes {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: #0f0d0b;
+  font-weight: 600;
+}
+
+.modal-yes:hover {
+  background: var(--c-accent2);
+  border-color: var(--c-accent2);
+}
+
+/* ─────────────────────────────────────────
+   PANTALLAS DE ESTADO FINAL
+   (done · ended · already-voted)
+───────────────────────────────────────── */
+#screen-done,
+#screen-ended,
+#screen-already-voted {
+  background: var(--c-bg);
+}
+
+.done-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 55% 55% at 50% 40%,
+    rgba(200,169,110,0.07) 0%,
+    transparent 70%
+  );
+}
+
+.done-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--gap-lg) var(--gap-md);
+  text-align: center;
+  gap: var(--gap-md);
+}
+
+.done-icon {
+  font-size: 2.5rem;
+  color: var(--c-accent);
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.1s forwards;
+}
+
+.done-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 10vw, 6rem);
+  letter-spacing: 0.14em;
+  color: var(--c-white);
+  line-height: 1.0;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.3s forwards;
+}
+
+.done-message {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: var(--c-muted);
+  max-width: 30ch;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.5s forwards;
+}
+
+.done-signature {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--c-accent);
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.7s forwards;
+}
+
+/* ─────────────────────────────────────────
+   KEYFRAMES
+───────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.6;  transform: translate(-50%,-50%) scale(1); }
+  50%       { opacity: 0.15; transform: translate(-50%,-50%) scale(1.06); }
+}
+
+@keyframes blink-dot {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+
+@keyframes horse-trot {
+  from { transform: translateY(0) rotate(-2deg); }
+  to   { transform: translateY(-5px) rotate(2deg); }
+}
+
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .participants-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    padding: 0 0.75rem 1.5rem;
+  }
+
+  .pairs-indicator {
+    gap: 0.3rem;
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  .pair-pill {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.6rem;
+  }
+
+  .vote-header {
+    padding: 3.2rem var(--gap-md) 0.75rem;
+  }
+
+  .modal-box {
+    padding: 2rem 1.25rem;
+  }
+
+  .active-pair-banner {
+    font-size: 0.76rem;
+    max-width: 240px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .participants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 901px) {
+  .participants-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

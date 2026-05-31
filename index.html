@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votación — Danzad Malditos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Archivo+Narrow:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="vote.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 1 — MENÚ INICIAL
+       Estado Firebase: /state vacío o todos false
+       Fondo dinámico: /voteSettings/menuBackground
+  ══════════════════════════════════════════ -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-bg-layer">
+      <div class="grain"></div>
+      <div class="vignette"></div>
+    </div>
+    <div class="menu-content">
+      <h1 class="menu-title">
+        <span class="menu-title-line1" id="text-menu-line1">DANZAD</span>
+        <span class="menu-title-line2" id="text-menu-line2">MALDITOS</span>
+      </h1>
+      <button id="btn-enter" class="btn-main" type="button">
+        <span class="btn-text">VOTACIÓN</span>
+        <span class="btn-arrow">→</span>
+      </button>
+      <div class="menu-footer-note" id="text-menu-note">Aquí no hay trampa ni cartón</div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 2 — SALA DE ESPERA
+       Estado Firebase: /state.waitingRoom = true
+       Símbolo: /voteSettings/waitingSymbol (reemplaza SVG caballo)
+       Textos:  /voteSettings/texts/waiting*
+  ══════════════════════════════════════════ -->
+  <section id="screen-waiting" class="screen">
+    <div class="waiting-bg">
+      <div class="grain"></div>
+      <div class="vignette-dark"></div>
+    </div>
+    <div class="waiting-content">
+      <div class="waiting-symbol" aria-hidden="true">
+        <div class="symbol-ring ring-1"></div>
+        <div class="symbol-ring ring-2"></div>
+        <div class="symbol-ring ring-3"></div>
+        <div class="symbol-core" id="waiting-symbol-core">
+          <!-- Caballo en trote SVG — reemplazable desde /voteSettings/waitingSymbol -->
+          <svg class="horse-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="48" cy="58" rx="22" ry="13" fill="currentColor" opacity="0.9"/>
+            <path d="M62 50 C66 40 70 33 68 26" stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none"/>
+            <ellipse cx="67" cy="22" rx="8" ry="6" transform="rotate(-20 67 22)" fill="currentColor"/>
+            <path d="M73 19 C77 18 79 20 78 23" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <circle cx="64" cy="19" r="1.5" fill="#0a0a0a"/>
+            <path d="M63 18 C61 14 60 10 62 7 M65 20 C63 16 63 12 65 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.7"/>
+            <path d="M61 17 C59 13 61 10 63 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M26 57 C20 52 16 56 14 62 C18 60 20 65 16 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+            <path d="M55 70 C53 76 50 80 48 86" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M60 70 C61 77 65 82 68 87" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M36 68 C32 74 28 76 24 82" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M40 70 C39 77 38 82 36 88" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M47 85 C45 88 50 89 52 87" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M67 86 C65 89 70 90 72 87" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M23 81 C21 84 26 85 28 82" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M35 87 C33 90 38 91 40 88" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+      <h1 class="waiting-title" id="text-waiting-title">ESPERE UN<br/>MOMENTO</h1>
+      <div class="waiting-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="waiting-message" id="text-waiting-message">Nuestro público también decide.</p>
+      <p class="waiting-signature" id="text-waiting-signature">Atte: <em>R.L.</em></p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 3 — VOTACIÓN
+       Estado Firebase: /state.votingOpen = true
+       Participantes: /participants (reactivo, auto-actualiza)
+  ══════════════════════════════════════════ -->
+  <section id="screen-vote" class="screen">
+
+    <!-- Fondo artístico — capas de gradiente cálido -->
+    <div class="vote-bg" aria-hidden="true">
+      <div class="vote-bg-gradient"></div>
+      <div class="grain"></div>
+    </div>
+
+    <!-- Botón reiniciar selección -->
+    <button class="btn-reset" id="btn-back-from-vote" type="button" aria-label="Reiniciar selección">
+      ↺ Reiniciar
+    </button>
+
+    <!-- Cabecera -->
+    <div class="vote-header">
+      <div class="vote-logo-small">RL</div>
+      <h2 class="vote-title">FORMA TUS PAREJAS</h2>
+      <p class="vote-subtitle">Toca dos participantes para formar cada pareja</p>
+    </div>
+
+    <!-- Banner pareja activa -->
+    <div class="active-pair-banner" id="active-pair-banner" aria-live="polite">
+      <div class="apb-dot" id="apb-dot"></div>
+      <span id="apb-text">Formando <strong>Pareja 1</strong></span>
+    </div>
+
+    <!-- Pills de progreso (5 parejas) -->
+    <div class="pairs-indicator" id="pairs-indicator" aria-label="Progreso de parejas">
+      <div class="pair-pill" data-pair="1">
+        <span class="pill-dot"></span>
+        <span class="pill-label">P1</span>
+        <span class="pill-count" id="count-1">0/2</span>
+      </div>
+      <div class="pair-pill" data-pair="2">
+        <span class="pill-dot"></span>
+        <span class="pill-label">P2</span>
+        <span class="pill-count" id="count-2">0/2</span>
+      </div>
+      <div class="pair-pill" data-pair="3">
+        <span class="pill-dot"></span>
+        <span class="pill-label">P3</span>
+        <span class="pill-count" id="count-3">0/2</span>
+      </div>
+      <div class="pair-pill" data-pair="4">
+        <span class="pill-dot"></span>
+        <span class="pill-label">P4</span>
+        <span class="pill-count" id="count-4">0/2</span>
+      </div>
+      <div class="pair-pill" data-pair="5">
+        <span class="pill-dot"></span>
+        <span class="pill-label">P5</span>
+        <span class="pill-count" id="count-5">0/2</span>
+      </div>
+    </div>
+
+    <!-- Grid de participantes — generado dinámicamente por JS desde /participants -->
+    <div class="participants-grid" id="participants-grid" role="list" aria-label="Participantes">
+      <div class="loading-participants" id="loading-participants">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Cargando participantes…</p>
+      </div>
+    </div>
+
+    <!-- Área botón registrar voto -->
+    <div class="vote-submit-area">
+      <button class="btn-register" id="btn-register" disabled type="button" aria-label="Registrar voto">
+        REGISTRAR VOTO
+      </button>
+      <p class="vote-progress-text" id="vote-progress-text">Completa las 5 parejas para continuar</p>
+    </div>
+
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       MODAL DE CONFIRMACIÓN
+       Muestra los nombres reales de cada pareja
+       antes de confirmar el voto.
+  ══════════════════════════════════════════ -->
+  <div id="modal-confirm" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+    <div class="modal-box">
+      <div class="modal-icon" aria-hidden="true">✦</div>
+      <h3 class="modal-title" id="modal-title-text">¿Confirmas<br/>estas parejas?</h3>
+      <div class="modal-pairs-summary" id="modal-pairs-summary">
+        <!-- Generado por JS — muestra nombres reales de /participants -->
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-no"  id="modal-no"  type="button">No, editar</button>
+        <button class="modal-btn modal-yes" id="modal-yes" type="button">Sí, confirmar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 4 — VOTO REGISTRADO
+       Se muestra después de confirmar voto exitoso.
+  ══════════════════════════════════════════ -->
+  <section id="screen-done" class="screen">
+    <div class="done-bg"><div class="grain"></div></div>
+    <div class="done-content">
+      <div class="done-icon" aria-hidden="true">✦</div>
+      <h2 class="done-title">VOTO<br/>REGISTRADO</h2>
+      <p class="done-message">Gracias por participar.<br/>Tu voz hace parte de la obra.</p>
+      <p class="done-signature">— <em>RL</em></p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 5 — VOTACIÓN CERRADA
+       Estado Firebase: /state.votingEnded = true
+  ══════════════════════════════════════════ -->
+  <section id="screen-ended" class="screen">
+    <div class="done-bg"><div class="grain"></div></div>
+    <div class="done-content">
+      <div class="done-icon" aria-hidden="true">✦</div>
+      <h2 class="done-title">VOTACIÓN<br/>CERRADA</h2>
+      <p class="done-message">La votación ha finalizado.<br/>Gracias por participar.</p>
+      <p class="done-signature">— <em>RL</em></p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 6 — YA VOTASTE ESTA RONDA
+       Bloqueo por ronda — no permanente.
+       Se desbloquea cuando /state.currentRound cambia.
+  ══════════════════════════════════════════ -->
+  <section id="screen-already-voted" class="screen">
+    <div class="done-bg"><div class="grain"></div></div>
+    <div class="done-content">
+      <div class="done-icon" aria-hidden="true" style="color:rgba(240,236,228,0.3)">✦</div>
+      <h2 class="done-title">YA<br/>VOTASTE</h2>
+      <p class="done-message">Ya registraste tu voto<br/>en esta ronda.</p>
+      <p class="done-signature">— <em>RL</em></p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       FIREBASE COMPAT SDK v9
+       - NO usa type="module" (incompatible GitHub Pages)
+       - Compat SDK expone window.firebase global
+       - Debe cargarse ANTES de vote.js
+  ══════════════════════════════════════════ -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="vote.js"></script>
+
+</body>
+</html>
